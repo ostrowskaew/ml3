@@ -25,7 +25,7 @@ def logistic_cost_function(w, x_train, y_train):
     '''
     N = x_train.shape[0]
     sig_arr = sigmoid(x_train @ w)  # NxM @ Mx1 = Nx1
-    out_arr = (y_train * np.log(sig_arr) + (1 - y_train) * np.log(1 - sig_arr))
+    out_arr = y_train * np.log(sig_arr) + (1 - y_train) * np.log(1 - sig_arr)
     grad = x_train.transpose() @ (sig_arr - y_train) / N    # MxN @ Nx1 = Mx1
     return -1 / N * np.sum(out_arr), grad
 
@@ -89,7 +89,13 @@ def regularized_logistic_cost_function(w, x_train, y_train, regularization_lambd
     :return: funkcja zwraca krotke (val, grad), gdzie val oznacza wartosc funkcji logistycznej z regularyzacja l2,
     a grad jej gradient po w
     '''
-    pass
+    val0, grad0 = logistic_cost_function(w, x_train, y_train)
+    ws = np.delete(w, 0)
+    regularization = regularization_lambda / 2 * np.linalg.norm(ws) ** 2
+    wz = w.copy()
+    wz[0] = 0
+    grad = grad0 + regularization_lambda * wz
+    return val0 + regularization, grad
 
 
 def prediction(x, w, theta):

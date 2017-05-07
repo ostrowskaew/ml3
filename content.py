@@ -106,8 +106,8 @@ def prediction(x, w, theta):
     :return: funkcja wylicza wektor y o wymiarach Nx1. Wektor zawiera wartosci etykiet ze zbioru {0,1} dla obserwacji z x
      bazujac na modelu z parametrami w oraz progu klasyfikacji theta
     '''
-    pass
-
+    sig_arr = sigmoid(x @ w)
+    return sig_arr > theta
 
 def f_measure(y_true, y_pred):
     '''

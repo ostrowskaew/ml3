@@ -39,7 +39,14 @@ def gradient_descent(obj_fun, w0, epochs, eta):
     :return: funkcja wykonuje optymalizacje metoda gradientu prostego dla funkcji obj_fun. Zwraca krotke (w,func_values),
     gdzie w oznacza znaleziony optymalny punkt w, a func_valus jest wektorem wartosci funkcji [epochs x 1] we wszystkich krokach algorytmu
     '''
-    pass
+    func_values = []
+    w = w0
+    _, grad = obj_fun(w)
+    for k in range(epochs):
+        w = w - eta * grad
+        val, grad = obj_fun(w)
+        func_values.append(val)
+    return w, np.reshape(np.array(func_values), (epochs, 1))
 
 
 def stochastic_gradient_descent(obj_fun, x_train, y_train, w0, epochs, eta, mini_batch):

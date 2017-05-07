@@ -141,28 +141,24 @@ def model_selection(x_train, y_train, x_val, y_val, w0, epochs, eta, mini_batch,
     Dodatkowo funkcja zwraca macierz F, ktora zawiera wartosci miary F dla wszystkich par (lambda, theta). Do uczenia nalezy
     korzystac z algorytmu SGD oraz kryterium uczenia z regularyzacja l2.
     '''
-    min_index = 0
-    number_of_thetas = len(thetas)
-    tuples = []
-    fmeasure_list = []
-
-    def test(index):
-        nonlocal min_index
-        i = int(index / number_of_thetas)
-        j = int(index % number_of_thetas)
-        measure = f_measure(y_val, prediction(x_val, wlist[i], thetas[j]))
-        tuples.append((i, j, wlist[i]))
-        fmeasure_list.append(measure)
-        if fmeasure_list[min_index] < measure:
-            min_index = index
-
     wlist = []
     for a_lambda in lambdas:
         w, _ = stochastic_gradient_descent(
             functools.partial(regularized_logistic_cost_function, regularization_lambda=a_lambda), x_train, y_train, w0,
             epochs, eta, mini_batch)
         wlist.append(w)
+    number_of_thetas = len(thetas)
     number_of_lambdas = len(lambdas)
-    xx = list(map(test, range(number_of_thetas * number_of_lambdas)))
+    tuples = []
+    fmeasure_list = []
+    min_index = 0
+    for index in range(number_of_thetas * number_of_lambdas):
+        lambda_index = int(index / number_of_thetas)
+        theta_index = int(index % number_of_thetas)
+        tuples.append((lambda_index, theta_index, wlist[lambda_index]))
+        measure = f_measure(y_val, prediction(x_val, wlist[lambda_index], thetas[theta_index]))
+        fmeasure_list.append(measure)
+        if fmeasure_list[min_index] < measure:
+            min_index = index
     return lambdas[tuples[min_index][0]], thetas[tuples[min_index][1]], tuples[min_index][2], np.array(
         fmeasure_list).reshape(number_of_lambdas, number_of_thetas)

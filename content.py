@@ -63,14 +63,13 @@ def stochastic_gradient_descent(obj_fun, x_train, y_train, w0, epochs, eta, mini
     gdzie w oznacza znaleziony optymalny punkt w, a func_values jest wektorem wartosci funkcji [epochs x 1] we wszystkich krokach algorytmu. Wartosci
     funkcji do func_values sa wyliczane dla calego zbioru treningowego!
     '''
-    w = w0
     x_subsets = []
     y_subsets = []
     M = int(y_train.shape[0] / mini_batch)
     for m in range(M):
         x_subsets.append(x_train[m * mini_batch: (m + 1) * mini_batch])
         y_subsets.append(y_train[m * mini_batch: (m + 1) * mini_batch])
-
+    w = w0
     vals = []
     for k in range(epochs):
         for m in range(M):

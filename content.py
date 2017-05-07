@@ -7,6 +7,8 @@
 # --------------------------------------------------------------------------
 
 import numpy as np
+import functools
+
 
 def sigmoid(x):
     '''
@@ -26,7 +28,7 @@ def logistic_cost_function(w, x_train, y_train):
     N = x_train.shape[0]
     sig_arr = sigmoid(x_train @ w)  # NxM @ Mx1 = Nx1
     out_arr = y_train * np.log(sig_arr) + (1 - y_train) * np.log(1 - sig_arr)
-    grad = x_train.transpose() @ (sig_arr - y_train) / N    # MxN @ Nx1 = Mx1
+    grad = x_train.transpose() @ (sig_arr - y_train) / N  # MxN @ Nx1 = Mx1
     return -1 / N * np.sum(out_arr), grad
 
 
@@ -109,6 +111,7 @@ def prediction(x, w, theta):
     sig_arr = sigmoid(x @ w)
     return sig_arr > theta
 
+
 def f_measure(y_true, y_pred):
     '''
     :param y_true: wektor rzeczywistych etykiet Nx1
@@ -138,4 +141,37 @@ def model_selection(x_train, y_train, x_val, y_val, w0, epochs, eta, mini_batch,
     Dodatkowo funkcja zwraca macierz F, ktora zawiera wartosci miary F dla wszystkich par (lambda, theta). Do uczenia nalezy
     korzystac z algorytmu SGD oraz kryterium uczenia z regularyzacja l2.
     '''
-    pass
+    tuples = []
+    fmeasure_list = []
+    wlist = []
+    alen = len(thetas)
+    blen = len(lambdas)
+    min_index = 0
+
+    def generate(index):
+        nonlocal wlist
+        (w, _) = stochastic_gradient_descent(
+            functools.partial(regularized_logistic_cost_function, regularization_lambda=lambdas[index])
+            , x_train, y_train, w0, epochs, eta, mini_batch)
+        wlist.append(w)
+
+    def test(index):
+        nonlocal min_index
+        i = int(index / alen)
+        j = int(index % alen)
+
+        measure = f_measure(y_val, prediction(x_val, wlist[i], thetas[j]))
+        tuples.append((i, j, wlist[i]))
+        fmeasure_list.append(measure)
+
+        if (fmeasure_list[min_index] < measure):
+            min_index = index
+
+    xx = map(generate, range(blen))
+    xx = list(xx)
+
+    xx = map(test, range(alen * blen))
+    xx = list(xx)
+
+    return lambdas[tuples[min_index][0]], thetas[tuples[min_index][1]], tuples[min_index][2], np.array(
+        fmeasure_list).reshape(blen, alen)

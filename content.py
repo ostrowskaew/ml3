@@ -141,20 +141,20 @@ def model_selection(x_train, y_train, x_val, y_val, w0, epochs, eta, mini_batch,
     Dodatkowo funkcja zwraca macierz F, ktora zawiera wartosci miary F dla wszystkich par (lambda, theta). Do uczenia nalezy
     korzystac z algorytmu SGD oraz kryterium uczenia z regularyzacja l2.
     '''
-    tuples = []
     F = []
     best_index = 0
     index = 0
+    ws = []
     for a_lambda in lambdas:
         w, _ = stochastic_gradient_descent(
             functools.partial(regularized_logistic_cost_function, regularization_lambda=a_lambda), x_train, y_train, w0,
             epochs, eta, mini_batch)
+        ws.append(w)
         for theta in thetas:
-            tuples.append((a_lambda, theta, w))
             measure = f_measure(y_val, prediction(x_val, w, theta))
             F.append(measure)
             if measure > F[best_index]:
                 best_index = index
             index += 1
-    return tuples[best_index][0], tuples[best_index][1], tuples[best_index][2], np.array(
+    return lambdas[best_index / len(thetas)], thetas[best_index % len(thetas)], ws[int(best_index / len(thetas))], np.array(
         F).reshape(len(lambdas), len(thetas))

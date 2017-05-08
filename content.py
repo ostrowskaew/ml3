@@ -142,19 +142,17 @@ def model_selection(x_train, y_train, x_val, y_val, w0, epochs, eta, mini_batch,
     korzystac z algorytmu SGD oraz kryterium uczenia z regularyzacja l2.
     '''
     F = []
-    best_index = 0
-    index = 0
-    ws = []
+    best_measure = -1
     for a_lambda in lambdas:
         w, _ = stochastic_gradient_descent(
             functools.partial(regularized_logistic_cost_function, regularization_lambda=a_lambda), x_train, y_train, w0,
             epochs, eta, mini_batch)
-        ws.append(w)
         for theta in thetas:
             measure = f_measure(y_val, prediction(x_val, w, theta))
             F.append(measure)
-            if measure > F[best_index]:
-                best_index = index
-            index += 1
-    return lambdas[best_index / len(thetas)], thetas[best_index % len(thetas)], ws[int(best_index / len(thetas))], np.array(
-        F).reshape(len(lambdas), len(thetas))
+            if measure > best_measure:
+                best_measure = measure
+                best_w = w
+                best_lambda = a_lambda
+                best_theta = theta
+    return best_lambda, best_theta, best_w, np.array(F).reshape(len(lambdas), len(thetas))

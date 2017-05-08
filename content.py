@@ -7,7 +7,6 @@
 # --------------------------------------------------------------------------
 
 import numpy as np
-import functools
 
 
 def sigmoid(x):
@@ -144,9 +143,8 @@ def model_selection(x_train, y_train, x_val, y_val, w0, epochs, eta, mini_batch,
     F = []
     best_measure = -1
     for a_lambda in lambdas:
-        w, _ = stochastic_gradient_descent(
-            functools.partial(regularized_logistic_cost_function, regularization_lambda=a_lambda), x_train, y_train, w0,
-            epochs, eta, mini_batch)
+        obj_fun = lambda w, x_train, y_train: regularized_logistic_cost_function(w, x_train, y_train, a_lambda)
+        w, _ = stochastic_gradient_descent(obj_fun, x_train, y_train, w0, epochs, eta, mini_batch)
         for theta in thetas:
             measure = f_measure(y_val, prediction(x_val, w, theta))
             F.append(measure)
